@@ -1,0 +1,29 @@
+name: Migrate Red Pitaya P1 branches from SQ4KOU-THETIS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mirror selected Red Pitaya P1 histories
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --mirror https://github.com/SQ4KOU/SQ4KOU-THETIS.git source.git
+          cd source.git
+          git remote add target "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force target refs/heads/pavel-20190527-p1:refs/heads/reference/pavel-20190527-p1
+          git push --force target refs/heads/sq4kou-p1-fpga-arm-confirmed-staging:refs/heads/staging/sq4kou-p1-fpga-arm-confirmed
+          git push --force target refs/heads/sq4kou-p1-fpga-arm-confirmed:refs/heads/baseline/sq4kou-p1-fpga-arm-confirmed
+          git push --force target refs/heads/sq4kou-p1-fpga-arm-confirmed-final:refs/heads/release/sq4kou-p1-fpga-arm-confirmed-final
+          git push --force target refs/heads/release-p1-full-sd-v1:refs/heads/release/p1-full-sd-v1
+          echo "Red Pitaya P1 migration complete"
